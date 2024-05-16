@@ -27,33 +27,27 @@
 
 package docstringchecker;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 
+import docstringchecker.FileChecker;
+import docstringchecker.FileCollection;
+
 public class DocstringChecker {
     public static void main(String[] args) {
 
         if (args.length != 1) {
-            System.err.println("You need to provide only one argument, the root from where to search for outdated files!");
+            System.err.println("You need to provide exactly one argument, the root from where to search for outdated files!");
             return;
         }
 
         String root = args[0];
-
-        try {
-            Stream<Path> files = Files.walk(Paths.get(root));
-            files
-                .filter(Files::isRegularFile)
-                .filter(Files::isWritable)
-                .forEach(System.out::println);
-        }
-        catch(Exception e) {
-            System.err.println(String.format(
-                "Could not recursively list files from %s", root
-            ));
-            System.err.println(e.toString());
-        }
+        FileCollection fileCollection = new FileCollection(root);
+        FileChecker fileChecker = new FileChecker(fileCollection);
+        fileChecker.verifyFileDocstrings();
+        fileChecker.summarize();
     }
 }
